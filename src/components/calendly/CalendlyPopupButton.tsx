@@ -1,3 +1,4 @@
+import { siteConfig } from "@/config/site-config";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import CalendlyInline from "./CalendlyInline";
@@ -22,7 +23,7 @@ interface CalendlyPopupButtonProps {
 
 const CalendlyPopupButton: React.FC<CalendlyPopupButtonProps> = ({ 
   text = "Book Your Appointment",
-  url = import.meta.env.VITE_CALENDLY_URL,
+  url = import.meta.env.VITE_CALENDLY_URL || siteConfig.calendly.url,
   className = "",
   variant = "default",
   size = "lg",

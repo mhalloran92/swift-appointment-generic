@@ -2,41 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { useScrollFadeIn } from "@/hooks/use-scroll-fade-in";
 import { Clock } from "lucide-react";
 import CalendlyPopupButton from "./calendly/CalendlyPopupButton";
-
-const services = [
-  {
-    name: "Initial Consultation",
-    focus: "Comprehensive assessment, exam, and first treatment",
-    duration: "45 min",
-    idealFor: "New patients · First visit",
-    frequency: "Most patients start with 1–2 visits in the first month.",
-    price: "Starting at $140",
-  },
-  {
-    name: "Standard Adjustment",
-    focus: "Targeted spinal and joint adjustments for ongoing care",
-    duration: "20 min",
-    idealFor: "Returning patients · Maintenance care",
-    frequency: "Often scheduled weekly, then tapered as symptoms improve.",
-    price: "Starting at $80",
-  },
-  {
-    name: "Mobility & Movement Session",
-    focus: "Guided mobility work for problem areas and performance",
-    duration: "30 min",
-    idealFor: "Athletes · Active professionals",
-    frequency: "Typically every 2–4 weeks during training blocks.",
-    price: "Starting at $95",
-  },
-  {
-    name: "Posture & Desk Relief Visit",
-    focus: "Posture-focused care with ergonomic guidance",
-    duration: "30 min",
-    idealFor: "Desk workers · Hybrid/remote roles",
-    frequency: "Commonly every 3–6 weeks depending on workload.",
-    price: "Starting at $95",
-  },
-];
+import { siteConfig } from "@/config/site-config";
 
 export default function ServicesSection() {
   const { ref, isVisible } = useScrollFadeIn();
@@ -65,7 +31,7 @@ export default function ServicesSection() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((s, i) => (
+          {siteConfig.services.map((s, i) => (
             <div
               key={s.name}
               className={`group relative rounded-xl border border-border bg-card/90 backdrop-blur-sm p-6 flex flex-col transition-all duration-300 hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 focus-within:border-primary/70 focus-within:shadow-lg focus-within:shadow-primary/15 ${
@@ -100,6 +66,7 @@ export default function ServicesSection() {
                 text="Book This Session"
                 variant="outline"
                 size="sm"
+                url={s.calendlyUrl}
                 className="w-full group-hover:border-primary group-hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 prefill={{
                   customAnswers: {

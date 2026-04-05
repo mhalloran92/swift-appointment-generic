@@ -26,7 +26,7 @@ export const siteConfig = {
     email: "hello@example.com",
   },
   calendly: {
-    url: "https://calendly.com/your-profile",
+    url: "https://calendly.com/michael-halloranai",
   },
   theme: {
     primary: "#0066FF",
@@ -35,6 +35,48 @@ export const siteConfig = {
     "Certified Practitioner",
     "Evidence-informed approach & rehab focus",
     "Experience with a wide range of client cases",
+  ],
+  services: [
+    {
+      id: "initial",
+      name: "Initial Consultation",
+      focus: "Comprehensive assessment, exam, and first treatment",
+      duration: "30 min",
+      idealFor: "New patients · First visit",
+      frequency: "Most patients start with 1–2 visits in the first month.",
+      price: "Starting at $140",
+      calendlyUrl: "https://calendly.com/michael-halloranai/30min"
+    },
+    {
+      id: "standard",
+      name: "Standard Adjustment",
+      focus: "Targeted spinal and joint adjustments for ongoing care",
+      duration: "20 min",
+      idealFor: "Returning patients · Maintenance care",
+      frequency: "Often scheduled weekly, then tapered as symptoms improve.",
+      price: "Starting at $80",
+      calendlyUrl: "https://calendly.com/michael-halloranai/standard-adjustment"
+    },
+    {
+      id: "mobility",
+      name: "Mobility & Movement Session",
+      focus: "Guided mobility work for problem areas and performance",
+      duration: "30 min",
+      idealFor: "Athletes · Active professionals",
+      frequency: "Typically every 2–4 weeks during training blocks.",
+      price: "Starting at $95",
+      calendlyUrl: "https://calendly.com/michael-halloranai/mobility-movement-session"
+    },
+    {
+      id: "posture",
+      name: "Posture & Desk Relief Visit",
+      focus: "Posture-focused care with ergonomic guidance",
+      duration: "30 min",
+      idealFor: "Desk workers · Hybrid/remote roles",
+      frequency: "Commonly every 3–6 weeks depending on workload.",
+      price: "Starting at $95",
+      calendlyUrl: "https://calendly.com/michael-halloranai/posture-desk-relief-visit"
+    },
   ],
   approach: [
     { 
