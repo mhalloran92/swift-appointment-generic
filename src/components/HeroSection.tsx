@@ -42,7 +42,7 @@ export default function HeroSection() {
         <div className="flex flex-col sm:inline-flex sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-4">
           <CalendlyPopupButton 
             text="Book Your Appointment"
-            url={siteConfig.services.find(s => s.id === "initial")?.calendlyUrl}
+            url={siteConfig.calendly.url}
             className="hover-scale text-base px-8 py-6 h-auto"
           />
           <Button
