@@ -40,17 +40,19 @@ export default function HeroSection() {
           their time in {siteConfig.location.city}.
         </p>
         <div className="flex flex-col sm:inline-flex sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-4">
-          <CalendlyPopupButton 
-            text="Book Your Appointment"
-            url={siteConfig.calendly.url}
+          <Button
+            size="lg"
             className="hover-scale text-base px-8 py-6 h-auto"
-          />
+            onClick={() => scrollToSection("services")}
+          >
+            Book Your Appointment
+          </Button>
           <Button
             type="button"
             variant="outline"
             size="lg"
             className="text-base px-8 py-6 h-auto"
-            onClick={() => scrollToSection("book")}
+            onClick={() => scrollToSection("services")}
           >
             See Appointment Types
             <ArrowRight className="w-4 h-4 ml-2" />

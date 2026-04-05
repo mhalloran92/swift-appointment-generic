@@ -1,6 +1,6 @@
 import { useScrollFadeIn } from "@/hooks/use-scroll-fade-in";
-import CalendlyPopupButton from "./calendly/CalendlyPopupButton";
-import { siteConfig } from "@/config/site-config";
+import { Button } from "@/components/ui/button";
+import { scrollToSection } from "@/lib/scroll-to-section";
 
 export default function FinalCTA() {
   const { ref, isVisible } = useScrollFadeIn();
@@ -21,11 +21,13 @@ export default function FinalCTA() {
         <p className="text-sm text-muted-foreground mb-8">
           The fastest way to schedule your visit is through our online booking system below.
         </p>
-        <CalendlyPopupButton 
-          text="Book Your Appointment"
-          url={siteConfig.calendly.url}
+        <Button 
+          size="lg"
           className="hover-scale text-base px-10 py-6 h-auto"
-        />
+          onClick={() => scrollToSection("services")}
+        >
+          Book Your Appointment
+        </Button>
       </div>
     </section>
   );
