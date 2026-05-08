@@ -3,24 +3,21 @@ import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientBookings, useCancelBooking, useClientProfile } from "@/hooks/useClientData";
-import { 
-  Calendar, 
-  Clock, 
-  ChevronRight, 
-  AlertCircle, 
-  CheckCircle2, 
-  CalendarPlus,
+import {
+  Calendar,
+  Clock,
+  ChevronRight,
+  CheckCircle2,
   ArrowRight,
   Bell,
   Activity,
   User,
-  History,
   XCircle,
   Stethoscope
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { format, isAfter, isBefore, parseISO } from "date-fns";
+import { format, isAfter, isBefore } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import CalendlyPopupButton from "@/components/calendly/CalendlyPopupButton";
@@ -51,11 +48,7 @@ const ClientDashboard = () => {
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/20 to-transparent pointer-events-none" />
           <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6">
-               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-bold uppercase tracking-widest">
-                 <Activity className="h-3 w-3 text-emerald-400" />
-                 Wellness Portal Active
-               </div>
-               <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
+<h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
                  Welcome back, <br/>
                  <span className="text-primary">{profile?.first_name || user?.user_metadata?.first_name || 'Friend'}!</span>
                </h1>
@@ -67,9 +60,11 @@ const ClientDashboard = () => {
                    text="Book New Session"
                    className="rounded-2xl h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
                  />
-                 <Button variant="outline" className="rounded-2xl h-12 px-6 font-bold border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-sm transition-all">
-                   View Care Plan
-                 </Button>
+                 <Link to="/care-plan">
+                   <Button variant="outline" className="rounded-2xl h-12 px-6 font-bold border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-sm transition-all">
+                     View Care Plan
+                   </Button>
+                 </Link>
                </div>
             </div>
 
@@ -213,7 +208,7 @@ const ClientDashboard = () => {
                    <Bell className="h-5 w-5 text-primary" />
                    Clinic Alerts
                  </h2>
-                 <Badge className="bg-primary/10 text-primary border-none text-[10px] rounded-full">2 New</Badge>
+                 <Badge className="bg-primary/10 text-primary border-none text-[10px] rounded-full">1 New</Badge>
                </div>
                
                <div className="space-y-4">
@@ -223,19 +218,10 @@ const ClientDashboard = () => {
                      </div>
                      <div>
                         <p className="font-bold text-slate-900 text-sm">Update your profile</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Please add your emergency contact detail.</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Please add your emergency contact details.</p>
                      </div>
                   </div>
 
-                  <div className="flex gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-100 hover:bg-white transition-colors cursor-pointer group">
-                     <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                        <AlertCircle className="h-5 w-5" />
-                     </div>
-                     <div>
-                        <p className="font-bold text-slate-900 text-sm">Holiday Hours</p>
-                        <p className="text-xs text-slate-500 mt-0.5">We are closed this Friday for the public holiday.</p>
-                     </div>
-                  </div>
                </div>
 
                <Link to="/notifications">

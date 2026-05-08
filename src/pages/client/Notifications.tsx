@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Bell, User, AlertCircle, CheckCircle2, ChevronRight, X, Info } from "lucide-react";
+import { Bell, User, CheckCircle2, ChevronRight, X, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -9,20 +9,10 @@ const Notifications = () => {
       id: 1,
       type: "action",
       title: "Update your profile",
-      description: "Please add your emergency contact detail to your clinical records.",
+      description: "Please add your emergency contact details to your clinical records.",
       icon: User,
       color: "bg-primary/10 text-primary",
       time: "2 hours ago",
-      isNew: true
-    },
-    {
-      id: 2,
-      type: "alert",
-      title: "Holiday Hours",
-      description: "We are closed this Friday for the public holiday. No sessions will be held.",
-      icon: AlertCircle,
-      color: "bg-amber-100 text-amber-600",
-      time: "5 hours ago",
       isNew: true
     },
     {
