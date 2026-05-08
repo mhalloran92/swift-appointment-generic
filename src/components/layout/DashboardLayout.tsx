@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Users, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  LogOut,
   Bell,
   Search,
   User as UserIcon,
   Menu,
-  X
+  X,
+  Shield,
+  BookOpen
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -38,9 +40,10 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
 
   const clientLinks = [
     { label: "My Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Management", href: "/dashboard", icon: Calendar }, // Points back to main hub for now
     { label: "Profile", href: "/profile", icon: Users },
     { label: "Notifications", href: "/notifications", icon: Bell },
+    { label: "Insurance", href: "/insurance", icon: Shield },
+    { label: "Resources", href: "/resources", icon: BookOpen },
   ];
 
   const links = isAdmin ? adminLinks : clientLinks;
