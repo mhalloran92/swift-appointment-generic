@@ -19,6 +19,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   first_name TEXT,
   last_name TEXT,
   phone TEXT,
+  date_of_birth DATE,
+  avatar_url TEXT,
+  emergency_contact_name TEXT,
+  emergency_contact_relationship TEXT,
+  emergency_contact_phone TEXT,
+  insurance_provider TEXT,
+  insurance_member_id TEXT,
+  insurance_group_number TEXT,
   role user_role DEFAULT 'user'::user_role NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -96,15 +104,17 @@ CREATE TABLE IF NOT EXISTS public.session_history (
 -- ==========================================
 
 -- Trigger to automatically create a profile when a new user signs up
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, first_name, last_name)
+  INSERT INTO public.profiles (id, email, first_name, last_name, phone, date_of_birth)
   VALUES (
-    new.id, 
-    new.email, 
-    new.raw_user_meta_data->>'first_name', 
-    new.raw_user_meta_data->>'last_name'
+    new.id,
+    new.email,
+    new.raw_user_meta_data->>'first_name',
+    new.raw_user_meta_data->>'last_name',
+    new.raw_user_meta_data->>'phone',
+    NULLIF(new.raw_user_meta_data->>'date_of_birth', '')::DATE
   );
   RETURN new;
 END;
