@@ -3,6 +3,40 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Booking, Profile } from "./useAdminData";
 
+export interface Appointment {
+  id: string;
+  user_id: string | null;
+  event_name: string;
+  start_time: string;
+  end_time: string | null;
+  status: "active" | "cancelled";
+  invitee_email: string;
+  invitee_name: string | null;
+  location: string | null;
+  cancel_url: string | null;
+  reschedule_url: string | null;
+  calendly_event_uri: string | null;
+  calendly_invitee_uri: string | null;
+  created_at: string;
+}
+
+export const useClientAppointments = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ["client-appointments", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("*")
+        .eq("user_id", userId)
+        .order("start_time", { ascending: true });
+      if (error) throw error;
+      return data as Appointment[];
+    },
+    enabled: !!userId,
+  });
+};
+
 export const useClientProfile = (userId: string | undefined) => {
   return useQuery({
     queryKey: ["client-profile", userId],

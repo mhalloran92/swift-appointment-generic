@@ -65,6 +65,24 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Appointments (synced from Calendly webhooks)
+CREATE TABLE IF NOT EXISTS public.appointments (
+  id                   UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id              UUID REFERENCES public.profiles(id),
+  event_name           TEXT NOT NULL,
+  start_time           TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_time             TIMESTAMP WITH TIME ZONE,
+  status               TEXT DEFAULT 'active' NOT NULL, -- 'active' | 'cancelled'
+  invitee_email        TEXT NOT NULL,
+  invitee_name         TEXT,
+  location             TEXT,
+  cancel_url           TEXT,
+  reschedule_url       TEXT,
+  calendly_event_uri   TEXT,
+  calendly_invitee_uri TEXT UNIQUE,
+  created_at           TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Availability Rules (For recurring schedules)
 CREATE TABLE IF NOT EXISTS public.availability_rules (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -151,6 +169,7 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.session_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.appointments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.availability_rules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.login_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.booking_history ENABLE ROW LEVEL SECURITY;
@@ -187,6 +206,13 @@ ON public.sessions FOR SELECT USING (status = 'active');
 
 CREATE POLICY "Admins can manage sessions" 
 ON public.sessions FOR ALL USING (public.is_admin());
+
+-- Appointments Policies
+CREATE POLICY "Users can view own appointments"
+ON public.appointments FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins have full access to appointments"
+ON public.appointments FOR ALL USING (public.is_admin());
 
 -- Bookings Policies
 CREATE POLICY "Users can view own bookings" 
