@@ -26,7 +26,7 @@ export const siteConfig = {
     email: "hello@example.com",
   },
   calendly: {
-    url: "https://calendly.com/michael-halloranai",
+    url: "https://calendly.com/michael-halloranai/30min",
   },
   theme: {
     primary: "#0066FF",
