@@ -82,6 +82,10 @@ export const siteConfig = {
       stripePriceId: "price_1TIVIHLn6dyiu6dtvUcVfGcr"
     },
   ],
+  wellnessGoal: {
+    title: "Your Wellness Goal",
+    description: "Maintain a bi-weekly adjustment schedule for optimal mobility.",
+  },
   approach: [
     { 
       title: "Assessment-first", 

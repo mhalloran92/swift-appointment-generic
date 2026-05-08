@@ -21,6 +21,7 @@ import { format, isAfter, isBefore } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import CalendlyPopupButton from "@/components/calendly/CalendlyPopupButton";
+import { siteConfig } from "@/config/site-config";
 
 const ClientDashboard = () => {
   const { user } = useAuth();
@@ -72,7 +73,9 @@ const ClientDashboard = () => {
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-xl space-y-4">
                <div className="flex items-center justify-between">
                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Your Next Visit</h3>
-                 <Badge className="bg-emerald-500/20 text-emerald-400 border-none rounded-full px-3 py-0.5 text-[10px] uppercase font-black">Confirmed</Badge>
+                 {nextBooking && (
+                   <Badge className="bg-emerald-500/20 text-emerald-400 border-none rounded-full px-3 py-0.5 text-[10px] uppercase font-black">Confirmed</Badge>
+                 )}
                </div>
                
                {nextBooking ? (
@@ -235,12 +238,8 @@ const ClientDashboard = () => {
                <div className="h-16 w-16 bg-white rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-4 border border-white">
                  <Activity className="h-8 w-8 text-primary" />
                </div>
-               <h3 className="text-lg font-black text-slate-900 leading-tight">Your Wellness Goal</h3>
-               <p className="text-sm text-slate-600 font-medium">Maintain a bi-weekly adjustment schedule for optimal mobility.</p>
-               <div className="w-full bg-white/50 h-2 rounded-full overflow-hidden">
-                 <div className="bg-primary h-full w-[65%]" />
-               </div>
-               <p className="text-[10px] font-bold text-primary uppercase tracking-widest">65% OF TARGET ACHIEVED</p>
+               <h3 className="text-lg font-black text-slate-900 leading-tight">{siteConfig.wellnessGoal.title}</h3>
+               <p className="text-sm text-slate-600 font-medium">{siteConfig.wellnessGoal.description}</p>
             </div>
           </div>
         </div>

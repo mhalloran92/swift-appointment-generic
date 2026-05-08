@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Bell, User, CheckCircle2, ChevronRight, X, Info } from "lucide-react";
+import { Bell, User, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -15,26 +15,6 @@ const Notifications = () => {
       time: "2 hours ago",
       isNew: true
     },
-    {
-      id: 3,
-      type: "success",
-      title: "Booking Confirmed",
-      description: "Your session on Nov 24th has been successfully confirmed by Dr. Jeffery Kamzik.",
-      icon: CheckCircle2,
-      color: "bg-emerald-100 text-emerald-600",
-      time: "1 day ago",
-      isNew: false
-    },
-    {
-      id: 4,
-      type: "info",
-      title: "New Protocol Available",
-      description: "We've added a new 'Post-Adjustment Recovery' guide to the wellness section.",
-      icon: Info,
-      color: "bg-blue-100 text-blue-600",
-      time: "3 days ago",
-      isNew: false
-    }
   ];
 
   return (

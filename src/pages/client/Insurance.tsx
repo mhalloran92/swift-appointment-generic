@@ -12,6 +12,7 @@ const Insurance = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [provider, setProvider] = useState("");
   const [memberId, setMemberId] = useState("");
   const [groupNumber, setGroupNumber] = useState("");
@@ -24,12 +25,13 @@ const Insurance = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("insurance_provider, insurance_member_id, insurance_group_number")
+        .select("date_of_birth, insurance_provider, insurance_member_id, insurance_group_number")
         .eq("id", user?.id)
         .single();
 
       if (error && error.code !== "PGRST116") throw error;
 
+      setDateOfBirth(data?.date_of_birth || "");
       setProvider(data?.insurance_provider || "");
       setMemberId(data?.insurance_member_id || "");
       setGroupNumber(data?.insurance_group_number || "");
@@ -49,6 +51,7 @@ const Insurance = () => {
         .from("profiles")
         .upsert({
           id: user?.id,
+          date_of_birth: dateOfBirth || null,
           insurance_provider: provider,
           insurance_member_id: memberId,
           insurance_group_number: groupNumber,
@@ -90,6 +93,16 @@ const Insurance = () => {
                   <p className="font-bold text-slate-900">Insurance Details</p>
                   <p className="text-sm text-slate-500">This information is stored securely on your profile.</p>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Date of Birth</label>
+                <input
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
+                />
               </div>
 
               <div>

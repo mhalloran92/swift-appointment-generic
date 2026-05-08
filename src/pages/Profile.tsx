@@ -239,7 +239,7 @@ export const Profile = () => {
               <p className="mt-1 text-xs text-slate-500">Email cannot be changed here.</p>
             </div>
 
-            <div className="pt-6 border-t border-slate-100 space-y-4">
+            <div className="pt-6 border-t border-slate-200 space-y-4">
               <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest">Emergency Contact</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
