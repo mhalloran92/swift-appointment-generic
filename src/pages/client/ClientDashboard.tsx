@@ -54,7 +54,9 @@ const ClientDashboard = () => {
                  <span className="text-primary">{profile?.first_name || user?.user_metadata?.first_name || 'Friend'}!</span>
                </h1>
                <p className="text-slate-400 text-lg max-w-sm">
-                 Your clinical path is on track. You've completed {pastBookings.length} sessions so far.
+                 {pastBookings.length === 0
+                   ? "Ready to get started? Book your first session below."
+                   : `Your clinical path is on track. You've completed ${pastBookings.length} session${pastBookings.length === 1 ? "" : "s"} so far.`}
                </p>
                <div className="flex flex-wrap gap-4">
                  <CalendlyPopupButton 

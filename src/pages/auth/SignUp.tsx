@@ -49,7 +49,7 @@ const SignUp = () => {
     navigate("/login");
   };
 
-  const inputClass = "mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900";
+  const inputClass = "mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900";
   const labelClass = "block text-sm font-medium text-slate-700";
 
   return (

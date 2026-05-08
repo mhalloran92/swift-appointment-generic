@@ -7,7 +7,6 @@ import {
   Users,
   LogOut,
   Bell,
-  Search,
   User as UserIcon,
   Menu,
   X,
@@ -135,17 +134,7 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
             <h1 className="text-lg font-semibold text-slate-800">{getPageTitle()}</h1>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-6">
-            <div className="hidden sm:flex relative items-center group">
-              <Search className="absolute left-3 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-              <input 
-                type="text" 
-                placeholder="Search anything..." 
-                className="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm w-48 lg:w-64 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
               <Button variant="ghost" size="icon" className="relative text-slate-500 hover:text-primary transition-colors hidden xs:flex">
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-2 right-2.5 h-2 w-2 bg-primary rounded-full border-2 border-white"></span>
@@ -200,7 +189,6 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
           </div>
         </header>
 
