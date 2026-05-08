@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -149,9 +150,14 @@ export default function ApplicationForm({ isOpen, onOpenChange, service }: Appli
               name="concern"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Main Concern (Optional)</FormLabel>
+                  <FormLabel>Reason for Visit (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Lower back pain, posture..." {...field} />
+                    <Textarea
+                      placeholder="Briefly describe what you're coming in for..."
+                      className="resize-none"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

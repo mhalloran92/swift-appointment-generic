@@ -18,6 +18,10 @@ export const Profile = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyRelationship, setEmergencyRelationship] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -29,7 +33,7 @@ export const Profile = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name, last_name, phone")
+        .select("first_name, last_name, phone, date_of_birth, emergency_contact_name, emergency_contact_relationship, emergency_contact_phone")
         .eq("id", user?.id)
         .single();
 
@@ -39,6 +43,10 @@ export const Profile = () => {
       setFirstName(data?.first_name || user?.user_metadata?.first_name || "");
       setLastName(data?.last_name || user?.user_metadata?.last_name || "");
       setPhone(data?.phone || user?.user_metadata?.phone || "");
+      setDateOfBirth(data?.date_of_birth || user?.user_metadata?.date_of_birth || "");
+      setEmergencyName(data?.emergency_contact_name || "");
+      setEmergencyRelationship(data?.emergency_contact_relationship || "");
+      setEmergencyPhone(data?.emergency_contact_phone || "");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -61,7 +69,11 @@ export const Profile = () => {
           id: user?.id,
           first_name: firstName,
           last_name: lastName,
-          phone: phone,
+          phone,
+          date_of_birth: dateOfBirth || null,
+          emergency_contact_name: emergencyName,
+          emergency_contact_relationship: emergencyRelationship,
+          emergency_contact_phone: emergencyPhone,
           updated_at: new Date().toISOString(),
         });
         
@@ -194,14 +206,25 @@ export const Profile = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Phone Number</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Phone Number</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Date of Birth</label>
+                <input
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
+                />
+              </div>
             </div>
 
             <div>
@@ -213,6 +236,42 @@ export const Profile = () => {
                 className="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-md shadow-sm sm:text-sm cursor-not-allowed"
               />
               <p className="mt-1 text-xs text-slate-500">Email cannot be changed here.</p>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 space-y-4">
+              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest">Emergency Contact</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Contact Name</label>
+                  <input
+                    type="text"
+                    value={emergencyName}
+                    onChange={(e) => setEmergencyName(e.target.value)}
+                    placeholder="e.g. Jane Doe"
+                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Relationship</label>
+                  <input
+                    type="text"
+                    value={emergencyRelationship}
+                    onChange={(e) => setEmergencyRelationship(e.target.value)}
+                    placeholder="e.g. Spouse, Parent"
+                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Emergency Contact Phone</label>
+                <input
+                  type="tel"
+                  value={emergencyPhone}
+                  onChange={(e) => setEmergencyPhone(e.target.value)}
+                  placeholder="e.g. (555) 000-0000"
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
+                />
+              </div>
             </div>
 
             <div className="pt-4 flex justify-end">
