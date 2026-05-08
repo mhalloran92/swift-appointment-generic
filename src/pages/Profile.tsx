@@ -300,9 +300,13 @@ export const Profile = () => {
              </p>
            </div>
            <div className="pt-2">
-             <CalendlyPopupButton 
+             <CalendlyPopupButton
                text="Book Your Appointment"
                className="rounded-2xl h-14 px-10 font-bold shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-base"
+               prefill={{
+                 name: [firstName, lastName].filter(Boolean).join(' ').trim(),
+                 email: user?.email || '',
+               }}
              />
            </div>
         </div>

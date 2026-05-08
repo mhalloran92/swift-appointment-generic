@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,13 +8,13 @@ import {
   Clock,
   ChevronRight,
   CheckCircle2,
-  ArrowRight,
   Bell,
   Activity,
   User,
   XCircle,
   Stethoscope
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format, isAfter, isBefore } from "date-fns";
@@ -28,7 +28,32 @@ const ClientDashboard = () => {
   const { data: bookings, isLoading } = useClientBookings(user?.id);
   const { data: profile } = useClientProfile(user?.id);
   const cancelMutation = useCancelBooking();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("upcoming");
+
+  const prefill = {
+    name: [
+      profile?.first_name || user?.user_metadata?.first_name,
+      profile?.last_name  || user?.user_metadata?.last_name,
+    ].filter(Boolean).join(' ').trim(),
+    email: user?.email || '',
+  };
+
+  // Refetch bookings after a Calendly booking is completed.
+  // The webhook writes the booking to Supabase asynchronously, so we
+  // invalidate immediately and again after a short delay to catch it.
+  useEffect(() => {
+    const handleCalendlyEvent = (e: MessageEvent) => {
+      if (e.data?.event === "calendly.event_scheduled") {
+        queryClient.invalidateQueries({ queryKey: ["client-bookings"] });
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["client-bookings"] });
+        }, 3000);
+      }
+    };
+    window.addEventListener("message", handleCalendlyEvent);
+    return () => window.removeEventListener("message", handleCalendlyEvent);
+  }, [queryClient]);
 
   const upcomingBookings = bookings?.filter(b => 
     b.status === 'confirmed' && isAfter(new Date(b.sessions.datetime), new Date())
@@ -59,9 +84,10 @@ const ClientDashboard = () => {
                    : `Your clinical path is on track. You've completed ${pastBookings.length} session${pastBookings.length === 1 ? "" : "s"} so far.`}
                </p>
                <div className="flex flex-wrap gap-4">
-                 <CalendlyPopupButton 
+                 <CalendlyPopupButton
                    text="Book New Session"
                    className="rounded-2xl h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                   prefill={prefill}
                  />
                  <Link to="/care-plan">
                    <Button variant="outline" className="rounded-2xl h-12 px-6 font-bold border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-sm transition-all">
@@ -103,7 +129,13 @@ const ClientDashboard = () => {
                ) : (
                  <div className="py-6 text-center">
                     <p className="text-slate-400 text-sm italic">No upcoming visits scheduled.</p>
-                    <Button variant="link" className="text-primary font-bold mt-2 h-auto p-0">Find a slot today <ArrowRight className="ml-1 h-3 w-3" /></Button>
+                    <CalendlyPopupButton
+                      text="Find a slot today →"
+                      variant="link"
+                      size="sm"
+                      className="text-primary font-bold mt-2 h-auto p-0"
+                      prefill={prefill}
+                    />
                  </div>
                )}
             </div>
@@ -173,9 +205,10 @@ const ClientDashboard = () => {
                        <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
                        <h3 className="text-lg font-bold text-slate-900">No active bookings</h3>
                        <p className="text-slate-500 text-sm max-w-[200px] mx-auto mt-1">Ready for your next session? Browse available slots below.</p>
-                       <CalendlyPopupButton 
+                       <CalendlyPopupButton
                          text="Book Appointment"
                          className="mt-6 rounded-xl font-bold shadow-lg shadow-primary/20"
+                         prefill={prefill}
                        />
                     </div>
                   )}

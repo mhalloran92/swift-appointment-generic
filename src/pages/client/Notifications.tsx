@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Bell, User, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,8 @@ const Notifications = () => {
       icon: User,
       color: "bg-primary/10 text-primary",
       time: "2 hours ago",
-      isNew: true
+      isNew: true,
+      link: "/profile",
     },
   ];
 
@@ -63,9 +65,15 @@ const Notifications = () => {
                   </p>
                   
                   <div className="pt-2 flex items-center gap-4">
-                    <Button variant="link" className="p-0 h-auto font-black text-primary text-sm no-underline group-hover:gap-2 transition-all">
-                      View Details <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    {notif.link ? (
+                      <Link to={notif.link} className="font-black text-primary text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                        View Details <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    ) : (
+                      <Button variant="link" className="p-0 h-auto font-black text-primary text-sm no-underline group-hover:gap-2 transition-all">
+                        View Details <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    )}
                     <div className="h-1 w-1 rounded-full bg-slate-300" />
                     <button className="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors">
                       Dismiss
