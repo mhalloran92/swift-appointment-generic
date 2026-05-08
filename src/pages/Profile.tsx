@@ -38,7 +38,7 @@ export const Profile = () => {
 
       setFirstName(data?.first_name || user?.user_metadata?.first_name || "");
       setLastName(data?.last_name || user?.user_metadata?.last_name || "");
-      setPhone(data?.phone || "");
+      setPhone(data?.phone || user?.user_metadata?.phone || "");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -180,7 +180,7 @@ export const Profile = () => {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
                 />
               </div>
               <div>
@@ -189,7 +189,7 @@ export const Profile = () => {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
                 />
               </div>
             </div>
@@ -200,7 +200,7 @@ export const Profile = () => {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm text-slate-900"
               />
             </div>
 
