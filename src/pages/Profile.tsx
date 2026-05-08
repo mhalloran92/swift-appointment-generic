@@ -32,14 +32,13 @@ export const Profile = () => {
         .select("first_name, last_name, phone")
         .eq("id", user?.id)
         .single();
-        
-      if (error) throw error;
-      
-      if (data) {
-        setFirstName(data.first_name || "");
-        setLastName(data.last_name || "");
-        setPhone(data.phone || "");
-      }
+
+      // PGRST116 = no row found; fine for brand-new users
+      if (error && error.code !== "PGRST116") throw error;
+
+      setFirstName(data?.first_name || user?.user_metadata?.first_name || "");
+      setLastName(data?.last_name || user?.user_metadata?.last_name || "");
+      setPhone(data?.phone || "");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -58,13 +57,13 @@ export const Profile = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: user?.id,
           first_name: firstName,
           last_name: lastName,
           phone: phone,
           updated_at: new Date().toISOString(),
-        })
-        .eq("id", user?.id);
+        });
         
       if (error) throw error;
       
