@@ -167,7 +167,7 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
                         {user?.email?.split('@')[0]}
                       </span>
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                        {role || "Member"}
+                        {isAdmin ? (role || "Admin") : "Patient"}
                       </span>
                     </div>
                   </Button>
