@@ -1,11 +1,84 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useScrollFadeIn } from "@/hooks/use-scroll-fade-in";
-import { Clock } from "lucide-react";
+import { Clock, Loader2 } from "lucide-react";
 import { siteConfig } from "@/config/site-config";
-import CalendlyPopupButton from "./calendly/CalendlyPopupButton";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import CalendlyInline from "./calendly/CalendlyInline";
+
+type Service = typeof siteConfig.services[0];
+type DialogState = "auth" | "first-visit" | "calendly" | null;
 
 export default function ServicesSection() {
   const { ref, isVisible } = useScrollFadeIn();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [dialogState, setDialogState] = useState<DialogState>(null);
+  const [isChecking, setIsChecking] = useState(false);
+
+  const initialService = siteConfig.services.find(s => s.id === "initial") ?? siteConfig.services[0];
+
+  const closeDialog = () => {
+    setDialogState(null);
+    setSelectedService(null);
+  };
+
+  const openCalendly = (service: Service) => {
+    setSelectedService(service);
+    setDialogState("calendly");
+  };
+
+  const handleBookClick = async (service: Service) => {
+    if (!user) {
+      setSelectedService(service);
+      setDialogState("auth");
+      return;
+    }
+
+    setIsChecking(true);
+    try {
+      const [appointmentsRes, profileRes] = await Promise.all([
+        supabase.from("appointments").select("id").eq("user_id", user.id).limit(1),
+        supabase.from("profiles").select("is_existing_patient").eq("id", user.id).single(),
+      ]);
+
+      const hasHistory = (appointmentsRes.data?.length ?? 0) > 0;
+      const isExistingPatient = profileRes.data?.is_existing_patient === true;
+
+      if (hasHistory || isExistingPatient) {
+        openCalendly(service);
+      } else {
+        setSelectedService(service);
+        setDialogState("first-visit");
+      }
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const handleFirstVisitYes = () => {
+    openCalendly(initialService);
+  };
+
+  const handleFirstVisitNo = async () => {
+    if (user) {
+      await supabase.from("profiles").update({ is_existing_patient: true }).eq("id", user.id);
+    }
+    // selectedService already set — open Calendly for what they originally clicked
+    setDialogState("calendly");
+  };
 
   return (
     <section id="services" className="py-24 md:py-32">
@@ -62,17 +135,70 @@ export default function ServicesSection() {
                 {s.frequency}
               </p>
 
-              <CalendlyPopupButton
-                text="Book This Session"
-                url={s.calendlyUrl}
+              <Button
                 variant="outline"
                 size="sm"
+                onClick={() => handleBookClick(s)}
+                disabled={isChecking}
                 className="w-full group-hover:border-primary group-hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              />
+              >
+                {isChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : "Book This Session"}
+              </Button>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Auth prompt */}
+      <Dialog open={dialogState === "auth"} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="sm:max-w-[400px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black">Sign in to book</DialogTitle>
+            <DialogDescription className="text-sm">
+              Create a free account or log in to book your appointment and track your visit history.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-2">
+            <Button onClick={() => navigate("/signup")} className="w-full h-11 font-bold rounded-xl">
+              Create Account
+            </Button>
+            <Button onClick={() => navigate("/login")} variant="outline" className="w-full h-11 font-bold rounded-xl">
+              Log In
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New vs returning prompt */}
+      <Dialog open={dialogState === "first-visit"} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="sm:max-w-[400px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black">Is this your first visit with us?</DialogTitle>
+            <DialogDescription className="text-sm">
+              This helps us match you with the right appointment type.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-2">
+            <Button onClick={handleFirstVisitYes} className="w-full h-11 font-bold rounded-xl">
+              Yes, this is my first visit
+            </Button>
+            <Button onClick={handleFirstVisitNo} variant="outline" className="w-full h-11 font-bold rounded-xl">
+              No, I've been here before
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Calendly popup */}
+      <Dialog open={dialogState === "calendly"} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="w-[95vw] sm:max-w-[1000px] p-0 border-none overflow-hidden h-[85vh] sm:h-[800px] rounded-2xl bg-[#080C16] shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]">
+          <div className="w-full h-full flex items-stretch">
+            {selectedService && dialogState === "calendly" && (
+              <CalendlyInline url={selectedService.calendlyUrl} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   insurance_provider TEXT,
   insurance_member_id TEXT,
   insurance_group_number TEXT,
+  is_existing_patient BOOLEAN DEFAULT false,
   role user_role DEFAULT 'user'::user_role NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
