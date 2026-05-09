@@ -46,7 +46,6 @@ export const siteConfig = {
       frequency: "Most patients start with 1–2 visits in the first month.",
       price: "Starting at $140",
       calendlyUrl: "https://calendly.com/michael-halloranai/30min",
-      stripePriceId: "price_1TIVC0Ln6dyiu6dtIQZOJUkh"
     },
     {
       id: "standard",
@@ -57,7 +56,6 @@ export const siteConfig = {
       frequency: "Often scheduled weekly, then tapered as symptoms improve.",
       price: "Starting at $80",
       calendlyUrl: "https://calendly.com/michael-halloranai/standard-adjustment",
-      stripePriceId: "price_1TIVGpLn6dyiu6dt3suYJRWS"
     },
     {
       id: "mobility",
@@ -68,7 +66,6 @@ export const siteConfig = {
       frequency: "Typically every 2–4 weeks during training blocks.",
       price: "Starting at $95",
       calendlyUrl: "https://calendly.com/michael-halloranai/mobility-movement-session",
-      stripePriceId: "price_1TIVHgLn6dyiu6dtB6znTfZE"
     },
     {
       id: "posture",
@@ -79,7 +76,6 @@ export const siteConfig = {
       frequency: "Commonly every 3–6 weeks depending on workload.",
       price: "Starting at $95",
       calendlyUrl: "https://calendly.com/michael-halloranai/posture-desk-relief-visit",
-      stripePriceId: "price_1TIVIHLn6dyiu6dtvUcVfGcr"
     },
   ],
   wellnessGoal: {

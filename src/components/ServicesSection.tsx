@@ -1,20 +1,11 @@
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useScrollFadeIn } from "@/hooks/use-scroll-fade-in";
 import { Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site-config";
-import ApplicationForm from "./booking/ApplicationForm";
+import CalendlyPopupButton from "./calendly/CalendlyPopupButton";
 
 export default function ServicesSection() {
   const { ref, isVisible } = useScrollFadeIn();
-  const [selectedService, setSelectedService] = useState<any>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
-  const handleBookClick = (service: any) => {
-    setSelectedService(service);
-    setIsFormOpen(true);
-  };
 
   return (
     <section id="services" className="py-24 md:py-32">
@@ -71,26 +62,17 @@ export default function ServicesSection() {
                 {s.frequency}
               </p>
 
-              <Button
+              <CalendlyPopupButton
+                text="Book This Session"
+                url={s.calendlyUrl}
                 variant="outline"
                 size="sm"
-                onClick={() => handleBookClick(s)}
                 className="w-full group-hover:border-primary group-hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                Book This Session
-              </Button>
+              />
             </div>
           ))}
         </div>
       </div>
-
-      {selectedService && (
-        <ApplicationForm
-          isOpen={isFormOpen}
-          onOpenChange={setIsFormOpen}
-          service={selectedService}
-        />
-      )}
     </section>
   );
 }
