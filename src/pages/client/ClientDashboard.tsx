@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,13 +31,17 @@ const ClientDashboard = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("upcoming");
 
-  const prefill = {
+  const prefill = useMemo(() => ({
     name: [
       profile?.first_name || user?.user_metadata?.first_name,
       profile?.last_name  || user?.user_metadata?.last_name,
     ].filter(Boolean).join(' ').trim(),
     email: user?.email || '',
-  };
+    phone: profile?.phone || '',
+  }), [
+    profile?.first_name, profile?.last_name, profile?.phone,
+    user?.user_metadata?.first_name, user?.user_metadata?.last_name, user?.email,
+  ]);
 
   useEffect(() => {
     const handleCalendlyEvent = (e: MessageEvent) => {

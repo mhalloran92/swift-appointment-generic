@@ -6,6 +6,7 @@ interface CalendlyInlineProps {
   prefill?: {
     name?: string;
     email?: string;
+    phone?: string;
     customAnswers?: Record<string, string>;
   };
 }
@@ -19,13 +20,20 @@ const CalendlyInline: React.FC<CalendlyInlineProps> = ({
 
   useEffect(() => {
     if (isLoaded && containerRef.current && url) {
+      // Clear any previously-rendered widget before re-initializing to prevent stacking
+      containerRef.current.innerHTML = "";
       const finalUrl = formatCalendlyUrl(url);
-      
+
       try {
         window.Calendly.initInlineWidget({
           url: finalUrl,
           parentElement: containerRef.current,
-          prefill: prefill,
+          prefill: {
+            name: prefill?.name,
+            email: prefill?.email,
+            smsReminderNumber: prefill?.phone,
+            customAnswers: prefill?.customAnswers,
+          },
           utm: {},
           backgroundColor: import.meta.env.VITE_CALENDLY_BG_COLOR || "ffffff",
           textColor: import.meta.env.VITE_CALENDLY_TEXT_COLOR || "1e293b",
@@ -36,7 +44,7 @@ const CalendlyInline: React.FC<CalendlyInlineProps> = ({
         console.error("Calendly initInlineWidget error:", err);
       }
     }
-  }, [isLoaded, url, prefill, formatCalendlyUrl]);
+  }, [isLoaded, url, prefill?.name, prefill?.email, prefill?.phone, prefill?.customAnswers, formatCalendlyUrl]);
 
   return (
     <div 

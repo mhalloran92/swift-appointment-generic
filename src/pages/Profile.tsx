@@ -306,6 +306,7 @@ export const Profile = () => {
                prefill={{
                  name: [firstName, lastName].filter(Boolean).join(' ').trim(),
                  email: user?.email || '',
+                 phone: phone || '',
                }}
              />
            </div>

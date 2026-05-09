@@ -17,6 +17,7 @@ interface CalendlyPopupButtonProps {
   prefill?: {
     name?: string;
     email?: string;
+    phone?: string;
     customAnswers?: Record<string, string>;
   };
 }
