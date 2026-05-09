@@ -1,0 +1,2 @@
+[functions.calendly-webhook]
+verify_jwt = false
