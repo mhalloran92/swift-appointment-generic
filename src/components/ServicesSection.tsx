@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Clock, Loader2 } from "lucide-react";
 import { siteConfig } from "@/config/site-config";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useClientProfile } from "@/hooks/useClientData";
 import CalendlyInline from "./calendly/CalendlyInline";
 
 type Service = typeof siteConfig.services[0];
@@ -22,7 +23,20 @@ type DialogState = "auth" | "first-visit" | "calendly" | null;
 export default function ServicesSection() {
   const { ref, isVisible } = useScrollFadeIn();
   const { user } = useAuth();
+  const { data: profile } = useClientProfile(user?.id);
   const navigate = useNavigate();
+
+  const prefill = useMemo(() => ({
+    name: [
+      profile?.first_name || user?.user_metadata?.first_name,
+      profile?.last_name  || user?.user_metadata?.last_name,
+    ].filter(Boolean).join(' ').trim(),
+    email: user?.email || '',
+    phone: profile?.phone || '',
+  }), [
+    profile?.first_name, profile?.last_name, profile?.phone,
+    user?.user_metadata?.first_name, user?.user_metadata?.last_name, user?.email,
+  ]);
 
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [dialogState, setDialogState] = useState<DialogState>(null);
@@ -194,7 +208,7 @@ export default function ServicesSection() {
         <DialogContent className="w-[95vw] sm:max-w-[1000px] p-0 border-none overflow-hidden h-[85vh] sm:h-[800px] rounded-2xl bg-[#080C16] shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]">
           <div className="w-full h-full flex items-stretch">
             {selectedService && dialogState === "calendly" && (
-              <CalendlyInline url={selectedService.calendlyUrl} />
+              <CalendlyInline url={selectedService.calendlyUrl} prefill={prefill} />
             )}
           </div>
         </DialogContent>
