@@ -246,6 +246,79 @@ export const useDeleteClient = () => {
   });
 };
 
+// --- Admin Dashboard Hooks ---
+
+export interface AdminAppointment {
+  id: string;
+  user_id: string | null;
+  event_name: string;
+  start_time: string;
+  end_time: string | null;
+  status: "active" | "cancelled";
+  invitee_email: string;
+  invitee_name: string | null;
+  location: string | null;
+  cancel_url: string | null;
+  reschedule_url: string | null;
+  created_at: string;
+}
+
+export const useAdminMetrics = () => {
+  return useQuery({
+    queryKey: ["admin-metrics"],
+    queryFn: async () => {
+      const now = new Date();
+      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).toISOString();
+
+      const [appointmentsRes, patientsRes, messagesRes] = await Promise.all([
+        supabase
+          .from("appointments")
+          .select("id", { count: "exact", head: true })
+          .gte("start_time", dayStart)
+          .lte("start_time", dayEnd)
+          .eq("status", "active"),
+        supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .in("role", ["user", "client"]),
+        supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("sender_role", "patient")
+          .eq("is_read", false),
+      ]);
+
+      return {
+        todayAppointments: appointmentsRes.count ?? 0,
+        totalPatients: patientsRes.count ?? 0,
+        unreadMessages: messagesRes.count ?? 0,
+      };
+    },
+    refetchInterval: 30_000,
+  });
+};
+
+export const useTodayAppointments = () => {
+  return useQuery({
+    queryKey: ["admin-today-appointments"],
+    queryFn: async () => {
+      const now = new Date();
+      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).toISOString();
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("*")
+        .gte("start_time", dayStart)
+        .lte("start_time", dayEnd)
+        .order("start_time", { ascending: true });
+      if (error) throw error;
+      return data as AdminAppointment[];
+    },
+    refetchInterval: 60_000,
+  });
+};
+
 // --- Bookings Hooks ---
 
 export const useAdminBookings = () => {
