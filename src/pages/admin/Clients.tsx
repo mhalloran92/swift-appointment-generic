@@ -31,10 +31,12 @@ import {
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const ROLE_PILL: Record<Profile["role"], string> = {
-  admin:  "bg-primary/10 text-primary",
-  client: "bg-emerald-100 text-emerald-700",
-  user:   "bg-slate-100 text-slate-500",
-  banned: "bg-red-100 text-red-600",
+  admin:          "bg-primary/10 text-primary",
+  doctor:         "bg-violet-100 text-violet-700",
+  office_manager: "bg-amber-100 text-amber-700",
+  client:         "bg-emerald-100 text-emerald-700",
+  user:           "bg-slate-100 text-slate-500",
+  banned:         "bg-red-100 text-red-600",
 };
 
 const InfoRow = ({

@@ -20,7 +20,7 @@ export interface Profile {
   first_name: string | null;
   last_name: string | null;
   phone: string | null;
-  role: "user" | "client" | "admin" | "banned";
+  role: "user" | "client" | "admin" | "doctor" | "office_manager" | "banned";
   avatar_url: string | null;
   date_of_birth: string | null;
   emergency_contact_name: string | null;
@@ -380,6 +380,54 @@ export const useUpdateBookingStatus = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
       toast.success("Booking status updated");
+    },
+  });
+};
+
+// --- Practice Settings Hooks ---
+
+export interface PracticeSettings {
+  id: number;
+  practice_name: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  calendly_url: string | null;
+  updated_at: string;
+}
+
+export const usePracticeSettings = () => {
+  return useQuery({
+    queryKey: ["practice-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("practice_settings")
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data as PracticeSettings;
+    },
+  });
+};
+
+export const useUpdatePracticeSettings = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (settings: Omit<PracticeSettings, "id" | "updated_at">) => {
+      const { data, error } = await supabase
+        .from("practice_settings")
+        .upsert({ id: 1, ...settings, updated_at: new Date().toISOString() })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["practice-settings"] });
+      toast.success("Settings saved successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Save failed: ${error.message}`);
     },
   });
 };

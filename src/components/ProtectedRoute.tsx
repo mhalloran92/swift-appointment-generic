@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
-  allowedRoles?: Array<"user" | "client" | "admin" | "banned">;
+  allowedRoles?: Array<"user" | "client" | "admin" | "doctor" | "office_manager" | "banned">;
 }
 
 export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
@@ -25,7 +25,7 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (allowedRoles && role && !allowedRoles.includes(role)) {
     // Logged in but insufficient role
     // Redirect to a default dashboard if they have one, or just '/'
-    if (role === "admin") return <Navigate to="/admin" replace />;
+    if (role === "admin" || role === "doctor" || role === "office_manager") return <Navigate to="/admin" replace />;
     if (role === "client" || role === "user") return <Navigate to="/dashboard" replace />;
     return <Navigate to="/" replace />;
   }

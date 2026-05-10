@@ -24,6 +24,7 @@ import Clients from "./pages/admin/Clients";
 import Bookings from "./pages/admin/Bookings";
 import Availability from "./pages/admin/Availability";
 import AdminMessages from "./pages/admin/Messages";
+import AdminSettings from "./pages/admin/Settings";
 import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
@@ -54,13 +55,14 @@ const App = () => (
             </Route>
 
             {/* Protected Admin Routes */}
-            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={["admin", "doctor", "office_manager"]} />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/sessions" element={<Sessions />} />
               <Route path="/admin/clients" element={<Clients />} />
               <Route path="/admin/bookings" element={<Bookings />} />
               <Route path="/admin/availability" element={<Availability />} />
               <Route path="/admin/messages" element={<AdminMessages />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
             </Route>
 
             {/* Catch-all */}
