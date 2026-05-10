@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   Shield,
-  BookOpen
+  BookOpen,
+  MessageSquare,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
     { label: "Sessions", href: "/admin/sessions", icon: Calendar },
     { label: "Clients", href: "/admin/clients", icon: Users },
     { label: "Bookings", href: "/admin/bookings", icon: Calendar },
+    { label: "Messages", href: "/admin/messages", icon: MessageSquare },
   ];
 
   const clientLinks = [
