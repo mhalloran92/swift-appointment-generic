@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMyUnreadCount } from "@/hooks/useMessages";
 import {
   LayoutDashboard,
   Calendar,
@@ -31,20 +32,24 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Unread message count for the client sidebar badge (no-ops when isAdmin)
+  const { data: unreadMessages = 0 } = useMyUnreadCount(!isAdmin ? user?.id : undefined);
+
   const adminLinks = [
-    { label: "Overview", href: "/admin", icon: LayoutDashboard },
-    { label: "Sessions", href: "/admin/sessions", icon: Calendar },
-    { label: "Clients", href: "/admin/clients", icon: Users },
-    { label: "Bookings", href: "/admin/bookings", icon: Calendar },
-    { label: "Messages", href: "/admin/messages", icon: MessageSquare },
+    { label: "Overview", href: "/admin", icon: LayoutDashboard, badge: 0 },
+    { label: "Sessions", href: "/admin/sessions", icon: Calendar, badge: 0 },
+    { label: "Clients", href: "/admin/clients", icon: Users, badge: 0 },
+    { label: "Bookings", href: "/admin/bookings", icon: Calendar, badge: 0 },
+    { label: "Messages", href: "/admin/messages", icon: MessageSquare, badge: 0 },
   ];
 
   const clientLinks = [
-    { label: "My Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Profile", href: "/profile", icon: Users },
-    { label: "Notifications", href: "/notifications", icon: Bell },
-    { label: "Insurance", href: "/insurance", icon: Shield },
-    { label: "Resources", href: "/resources", icon: BookOpen },
+    { label: "My Dashboard", href: "/dashboard", icon: LayoutDashboard, badge: 0 },
+    { label: "Profile", href: "/profile", icon: Users, badge: 0 },
+    { label: "Messages", href: "/dashboard/messages", icon: MessageSquare, badge: unreadMessages },
+    { label: "Notifications", href: "/notifications", icon: Bell, badge: 0 },
+    { label: "Insurance", href: "/insurance", icon: Shield, badge: 0 },
+    { label: "Resources", href: "/resources", icon: BookOpen, badge: 0 },
   ];
 
   const links = isAdmin ? adminLinks : clientLinks;
@@ -76,13 +81,18 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
               to={link.href}
               onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                isActive 
-                  ? "text-primary bg-primary/5 shadow-sm shadow-primary/5" 
+                isActive
+                  ? "text-primary bg-primary/5 shadow-sm shadow-primary/5"
                   : "text-slate-600 hover:text-primary hover:bg-slate-50"
               }`}
             >
               <Icon className={`mr-3 h-5 w-5 ${isActive ? "text-primary" : "text-slate-400 opacity-80"}`} />
-              {link.label}
+              <span className="flex-1">{link.label}</span>
+              {link.badge > 0 && (
+                <span className="ml-2 bg-primary text-white text-[10px] font-black rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center leading-none">
+                  {link.badge}
+                </span>
+              )}
             </Link>
           );
         })}

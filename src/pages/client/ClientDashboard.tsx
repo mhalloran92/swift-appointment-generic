@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,26 +13,15 @@ import {
   User,
   XCircle,
   Stethoscope,
-  MessageSquare,
-  Send,
-  Loader2 as Spin,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { format, isAfter, isBefore } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import CalendlyPopupButton from "@/components/calendly/CalendlyPopupButton";
 import { siteConfig } from "@/config/site-config";
-import {
-  useMyMessages,
-  useMyUnreadCount,
-  useSendPatientMessage,
-  useMarkMyMessagesRead,
-} from "@/hooks/useMessages";
-import { cn } from "@/lib/utils";
 
 const ClientDashboard = () => {
   const { user } = useAuth();
@@ -40,43 +29,6 @@ const ClientDashboard = () => {
   const { data: profile } = useClientProfile(user?.id);
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("upcoming");
-  const [activeMainTab, setActiveMainTab] = useState("overview");
-
-  // Messages
-  const { data: messages, isLoading: loadingMessages } = useMyMessages(user?.id);
-  const { data: unreadCount = 0 } = useMyUnreadCount(user?.id);
-  const sendMessage = useSendPatientMessage();
-  const markRead = useMarkMyMessagesRead();
-  const [messageBody, setMessageBody] = useState("");
-  const messagesBottomRef = useRef<HTMLDivElement>(null);
-
-  // Mark admin messages as read when the Messages tab is opened
-  useEffect(() => {
-    if (activeMainTab === "messages" && user?.id) {
-      markRead.mutate(user.id);
-    }
-  }, [activeMainTab, user?.id]);
-
-  // Scroll to newest message whenever the thread updates or tab opens
-  useEffect(() => {
-    if (activeMainTab === "messages") {
-      messagesBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, activeMainTab]);
-
-  const handleSendMessage = async () => {
-    const trimmed = messageBody.trim();
-    if (!trimmed || !user?.id || sendMessage.isPending) return;
-    await sendMessage.mutateAsync({ userId: user.id, body: trimmed });
-    setMessageBody("");
-  };
-
-  const handleMessageKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
 
   const prefill = useMemo(() => ({
     name: [
@@ -115,31 +67,7 @@ const ClientDashboard = () => {
 
   return (
     <DashboardLayout isAdmin={false}>
-      <div className="max-w-7xl mx-auto">
-        {/* Top-level tab switcher */}
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-          <TabsList className="bg-slate-100 rounded-2xl p-1 h-11 border-none mb-8 w-auto inline-flex">
-            <TabsTrigger
-              value="overview"
-              className="rounded-xl font-bold text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-5"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="messages"
-              className="rounded-xl font-bold text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-5 flex items-center gap-2"
-            >
-              Messages
-              {unreadCount > 0 && (
-                <Badge className="bg-primary text-white border-none rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center text-[10px] font-black">
-                  {unreadCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          {/* ── Overview tab ─────────────────────────────────────────── */}
-          <TabsContent value="overview" className="mt-0 space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="max-w-7xl mx-auto space-y-10">
 
         {/* Personalized Welcome Hero */}
         <section className="relative overflow-hidden rounded-[40px] bg-slate-900 text-white p-8 md:p-12 shadow-2xl">
@@ -350,87 +278,6 @@ const ClientDashboard = () => {
           </div>
         </div>
 
-          </TabsContent>
-
-          {/* ── Messages tab ─────────────────────────────────────────── */}
-          <TabsContent value="messages" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden flex flex-col"
-                 style={{ height: "calc(100vh - 260px)" }}>
-              {/* Thread */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-3">
-                {loadingMessages ? (
-                  <div className="flex justify-center py-12">
-                    <Spin className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                ) : !messages?.length ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                    <MessageSquare className="h-12 w-12 text-slate-200 mb-4" />
-                    <p className="font-bold text-slate-700">No messages yet</p>
-                    <p className="text-sm text-slate-400 mt-1 max-w-xs">
-                      Send a message below and the practice will get back to you.
-                    </p>
-                  </div>
-                ) : (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={cn(
-                        "flex",
-                        msg.sender_role === "patient" ? "justify-end" : "justify-start"
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "max-w-[70%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
-                          msg.sender_role === "patient"
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-slate-100 text-slate-800 rounded-bl-sm"
-                        )}
-                      >
-                        <p className="whitespace-pre-wrap break-words">{msg.body}</p>
-                        <p
-                          className={cn(
-                            "text-[10px] mt-1.5 font-medium",
-                            msg.sender_role === "patient"
-                              ? "text-white/60 text-right"
-                              : "text-slate-400"
-                          )}
-                        >
-                          {format(new Date(msg.created_at), "MMM d, h:mm a")}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
-                <div ref={messagesBottomRef} />
-              </div>
-
-              {/* Reply box */}
-              <div className="border-t border-slate-100 p-4 flex gap-3 items-end shrink-0">
-                <Textarea
-                  value={messageBody}
-                  onChange={(e) => setMessageBody(e.target.value)}
-                  onKeyDown={handleMessageKeyDown}
-                  placeholder="Type a message to the practice… (Enter to send)"
-                  className="resize-none rounded-2xl border-slate-200 text-sm focus-visible:ring-primary/20"
-                  rows={2}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!messageBody.trim() || sendMessage.isPending}
-                  className="h-[72px] w-12 rounded-2xl p-0 shadow-lg shadow-primary/20 shrink-0"
-                >
-                  {sendMessage.isPending ? (
-                    <Spin className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-        </Tabs>
       </div>
     </DashboardLayout>
   );

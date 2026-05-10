@@ -17,6 +17,7 @@ import Notifications from "./pages/client/Notifications";
 import CarePlan from "./pages/client/CarePlan";
 import Insurance from "./pages/client/Insurance";
 import Resources from "./pages/client/Resources";
+import ClientMessages from "./pages/client/Messages";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Sessions from "./pages/admin/Sessions";
 import Clients from "./pages/admin/Clients";
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="/care-plan" element={<CarePlan />} />
               <Route path="/insurance" element={<Insurance />} />
               <Route path="/resources" element={<Resources />} />
+              <Route path="/dashboard/messages" element={<ClientMessages />} />
             </Route>
 
             {/* Protected Admin Routes */}
