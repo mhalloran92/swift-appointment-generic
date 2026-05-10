@@ -1,480 +1,358 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreHorizontal, 
-  Mail, 
-  Phone, 
-  Calendar,
-  ShieldCheck,
-  UserCheck,
-  Clock,
-  Trash2,
-  Users,
-  Loader2,
-  Check,
-  Eye,
-  Pencil,
-  MapPin,
-  ExternalLink
-} from "lucide-react";
+import { useAdminClients, Profile } from "@/hooks/useAdminData";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAdminClients, useUpdateClientRole, useUpdateClientProfile, useDeleteClient, Profile } from "@/hooks/useAdminData";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
+import { format } from "date-fns";
+import {
+  IconSearch,
+  IconUsersGroup,
+  IconMail,
+  IconPhone,
+  IconCalendar,
+  IconShieldCheck,
+  IconHeartHandshake,
+  IconMessages,
+  IconUser,
+  IconId,
+  IconHash,
+  IconChevronRight,
+} from "@tabler/icons-react";
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+const ROLE_PILL: Record<Profile["role"], string> = {
+  admin:  "bg-primary/10 text-primary",
+  client: "bg-emerald-100 text-emerald-700",
+  user:   "bg-slate-100 text-slate-500",
+  banned: "bg-red-100 text-red-600",
+};
+
+const InfoRow = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | null | undefined;
+}) => (
+  <div className="flex items-start gap-3 py-3.5 border-b border-slate-100 last:border-0">
+    <div className="mt-0.5 text-slate-300 shrink-0">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">
+        {label}
+      </p>
+      {value ? (
+        <p className="text-sm font-semibold text-slate-800 break-words">{value}</p>
+      ) : (
+        <p className="text-sm text-slate-300 italic">Not on file</p>
+      )}
+    </div>
+  </div>
+);
+
+const SectionHead = ({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) => (
+  <div className="flex items-center gap-2 mb-3">
+    <span className="text-primary">{icon}</span>
+    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{title}</p>
+  </div>
+);
+
+// ── Page ───────────────────────────────────────────────────────────────────
 
 const Clients = () => {
   const { data: clients, isLoading } = useAdminClients();
-  const updateRoleMutation = useUpdateClientRole();
-  const updateProfileMutation = useUpdateClientProfile();
-  const deleteClientMutation = useDeleteClient();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<Profile['role'] | 'all'>('all');
-  const [selectedClient, setSelectedClient] = useState<Profile | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Profile>>({});
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Profile | null>(null);
+  const navigate = useNavigate();
 
-  const filteredClients = clients?.filter(client => {
-    const matchesSearch = (
-      client.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      client.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const matchesRole = roleFilter === 'all' || client.role === roleFilter;
-    return matchesSearch && matchesRole;
-  }) || [];
-
-  const handleUpdateRole = async (id: string, newRole: Profile['role']) => {
-    try {
-      await updateRoleMutation.mutateAsync({ id, role: newRole });
-    } catch (error) {
-       // Handled in mutation
-    }
-  };
-
-  const handleOpenView = (client: Profile) => {
-    setSelectedClient(client);
-    setIsEditing(false);
-    setEditForm({
-      first_name: client.first_name,
-      last_name: client.last_name,
-      phone: client.phone,
-      email: client.email
-    });
-  };
-
-  const handleSaveProfile = async () => {
-    if (!selectedClient) return;
-    try {
-      await updateProfileMutation.mutateAsync({
-        id: selectedClient.id,
-        ...editForm
-      });
-      setIsEditing(false);
-      // Update selected client in UI
-      setSelectedClient({ ...selectedClient, ...editForm } as Profile);
-    } catch (error) {
-      // Handled in mutation
-    }
-  };
-
-  const handleDeleteClient = async () => {
-    if (!selectedClient) return;
-    
-    // Simple confirmation - in a real app use a more robust confirmation dialog
-    if (!window.confirm(`Are you sure you want to archive ${selectedClient.first_name}? This will remove them from the directory.`)) return;
-    
-    try {
-      await deleteClientMutation.mutateAsync(selectedClient.id);
-      setSelectedClient(null);
-    } catch (error) {
-      // Handled in mutation
-    }
-  };
+  const filtered =
+    clients?.filter((c) => {
+      const q = search.toLowerCase();
+      return (
+        c.first_name?.toLowerCase().includes(q) ||
+        c.last_name?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q) ||
+        c.phone?.includes(q)
+      );
+    }) ?? [];
 
   return (
     <DashboardLayout isAdmin={true}>
       <div className="space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Client Directory</h2>
-            <p className="text-slate-500 mt-1">Manage patient records and administrative access levels.</p>
-          </div>
-          <Button className="rounded-xl h-11 px-6 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-            <Plus className="mr-2 h-4 w-4" />
-            Register New Client
-          </Button>
+
+        {/* ── Header ─────────────────────────────────────────────────── */}
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Clients</h2>
+          <p className="text-slate-500 mt-1">
+            {isLoading
+              ? "Loading patient records…"
+              : `${clients?.length ?? 0} patient${clients?.length === 1 ? "" : "s"} registered`}
+          </p>
         </div>
 
-        {/* Toolbar */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div className="md:col-span-8 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input 
-              placeholder="Search by name, email or phone..." 
-              className="pl-10 h-11 rounded-xl border-slate-200 bg-white shadow-sm focus:ring-primary/20"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="md:col-span-4 flex gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex-1 h-11 rounded-xl px-4 border-slate-200 bg-white text-slate-600 hover:text-primary hover:border-primary/30 transition-all">
-                  <Filter className="mr-2 h-4 w-4" />
-                  {roleFilter === 'all' ? 'All Roles' : roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-slate-100">
-                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">Filter by Role</DropdownMenuLabel>
-                {(['all', 'admin', 'client', 'user'] as const).map((r) => (
-                  <DropdownMenuItem 
-                    key={r} 
-                    onClick={() => setRoleFilter(r)}
-                    className="flex items-center justify-between px-3 py-2.5 cursor-pointer rounded-lg m-1"
-                  >
-                    <span className="capitalize">{r}</span>
-                    {roleFilter === r && <Check className="h-4 w-4 text-primary" />}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="outline" className="flex-1 h-11 rounded-xl px-4 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all">
-              Export
-            </Button>
-          </div>
+        {/* ── Search ─────────────────────────────────────────────────── */}
+        <div className="relative max-w-md">
+          <IconSearch
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          />
+          <Input
+            placeholder="Search by name, email or phone…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 h-11 rounded-2xl border-slate-200 bg-white shadow-sm focus-visible:ring-primary/20"
+          />
         </div>
 
-        {/* Table Area */}
+        {/* ── Roster ─────────────────────────────────────────────────── */}
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-          {isLoading ? (
-             <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                <p className="text-slate-500 font-medium">Loading patient records...</p>
-             </div>
-          ) : (
-            <Table>
-              <TableHeader className="bg-slate-50/50">
-                <TableRow className="hover:bg-transparent border-slate-100">
-                  <TableHead className="w-[300px] font-bold text-slate-500 py-4 px-6">Client</TableHead>
-                  <TableHead className="font-bold text-slate-500 py-4">Contact</TableHead>
-                  <TableHead className="font-bold text-slate-500 py-4">Role</TableHead>
-                  <TableHead className="font-bold text-slate-500 py-4">Registered</TableHead>
-                  <TableHead className="text-right py-4 px-6 font-bold text-slate-500">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredClients.map((client) => (
-                  <TableRow 
-                    key={client.id} 
-                    onClick={() => handleOpenView(client)}
-                    className="group hover:bg-slate-50/50 border-slate-50 transition-colors cursor-pointer"
-                  >
-                    <TableCell className="py-5 px-6">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-10 w-10 border-2 border-white group-hover:scale-105 transition-transform shadow-sm">
-                          <AvatarImage src={client.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${client.email}`} />
-                          <AvatarFallback>{client.first_name?.charAt(0) || client.email?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-bold text-slate-900 leading-none">
-                              {client.first_name} {client.last_name}
-                            </p>
-                            {client.role === 'admin' && <ShieldCheck className="h-3 w-3 text-primary" />}
-                          </div>
-                          <p className="text-[11px] text-slate-400 mt-1 font-medium tracking-tight truncate max-w-[150px]">{client.id}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                          <Mail className="h-3.5 w-3.5 text-slate-300" />
-                          <span className="truncate max-w-[180px]">{client.email || 'No email'}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                          <Phone className="h-3.5 w-3.5 text-slate-300" />
-                          {client.phone || 'No phone'}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                        client.role === 'admin' ? 'bg-primary/10 text-primary' :
-                        client.role === 'client' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                      }`}>
-                        {client.role}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Calendar className="h-4 w-4 text-slate-300" />
-                        {format(new Date(client.created_at), "MMM d, yyyy")}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right py-5 px-6">
-                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleOpenView(client)}
-                          className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl border border-transparent hover:border-slate-100 transition-all"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-9 w-9 p-0 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 shadow-sm transition-all focus-visible:ring-primary/20">
-                              <MoreHorizontal className="h-4 w-4 text-slate-400" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-xl border-slate-100 shadow-xl w-52 p-2">
-                            <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1.5">Management</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleOpenView(client)} className="px-3 py-2.5 rounded-lg cursor-pointer flex items-center gap-2 hover:bg-slate-50 font-medium">
-                              <Eye className="h-4 w-4 opacity-70" />
-                              View Patient Details
-                            </DropdownMenuItem>
-                            
-                            <DropdownMenuSeparator className="bg-slate-50 mx-1 my-1.5" />
-                            <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1">Change Access Level</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleUpdateRole(client.id, 'client')} className="px-3 py-2 rounded-lg cursor-pointer flex justify-between items-center m-0.5">
-                              Client {client.role === 'client' && <Check className="h-3.5 w-3.5 text-primary" />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleUpdateRole(client.id, 'admin')} className="px-3 py-2 rounded-lg cursor-pointer flex justify-between items-center m-0.5">
-                              Admin {client.role === 'admin' && <Check className="h-3.5 w-3.5 text-primary" />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleUpdateRole(client.id, 'user')} className="px-3 py-2 rounded-lg cursor-pointer flex justify-between items-center m-0.5">
-                              User {client.role === 'user' && <Check className="h-3.5 w-3.5 text-primary" />}
-                            </DropdownMenuItem>
-                            
-                            <DropdownMenuSeparator className="bg-slate-50 mx-1 my-1.5" />
-                            <DropdownMenuItem className="px-3 py-2.5 rounded-lg cursor-pointer text-red-600 flex items-center gap-2 hover:bg-red-50 focus:bg-red-50 focus:text-red-700 transition-colors">
-                              <Trash2 className="h-4 w-4 opacity-70" />
-                              Archive Account
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-          
-          {!isLoading && filteredClients.length === 0 && (
-            <div className="py-24 text-center animate-in fade-in zoom-in duration-300">
-               <div className="bg-slate-50 h-20 w-20 rounded-[32px] flex items-center justify-center mx-auto mb-6 shadow-inner">
-                  <Users className="h-10 w-10 text-slate-200" />
-               </div>
-               <h3 className="text-xl font-bold text-slate-900">No matching records</h3>
-               <p className="text-slate-500 text-sm mt-2 max-w-xs mx-auto">Try broadening your search or resetting the role filter.</p>
-               <Button 
-                variant="link" 
-                className="mt-4 text-primary font-bold"
-                onClick={() => { setSearchQuery(""); setRoleFilter("all"); }}
-               >
-                 Clear all filters
-               </Button>
+
+          {/* Column headers */}
+          <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.4fr)_minmax(0,1fr)_32px] gap-x-4 px-6 py-3 border-b border-slate-100 bg-slate-50/60">
+            {["Patient", "Email", "Phone", "Joined", ""].map((h) => (
+              <p key={h} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                {h}
+              </p>
+            ))}
+          </div>
+
+          {/* Loading skeletons */}
+          {isLoading && (
+            <div>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.4fr)_minmax(0,1fr)_32px] gap-x-4 px-6 py-4 border-b border-slate-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+                    <Skeleton className="h-4 w-28 rounded-lg" />
+                  </div>
+                  <Skeleton className="h-4 w-40 rounded-lg self-center" />
+                  <Skeleton className="h-4 w-24 rounded-lg self-center" />
+                  <Skeleton className="h-4 w-20 rounded-lg self-center" />
+                </div>
+              ))}
             </div>
           )}
+
+          {/* Empty state */}
+          {!isLoading && filtered.length === 0 && (
+            <div className="py-20 text-center">
+              <IconUsersGroup size={44} className="text-slate-200 mx-auto mb-4" />
+              <p className="font-bold text-slate-600">No patients found</p>
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="mt-2 text-sm text-primary font-bold hover:underline"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Rows */}
+          {!isLoading &&
+            filtered.map((client) => (
+              <button
+                key={client.id}
+                onClick={() => setSelected(client)}
+                className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.4fr)_minmax(0,1fr)_32px] gap-x-4 px-6 py-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors w-full text-left group"
+              >
+                {/* Patient */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar className="h-9 w-9 shrink-0 border border-slate-100">
+                    <AvatarImage src={client.avatar_url ?? undefined} />
+                    <AvatarFallback className="text-xs font-bold bg-slate-100 text-slate-500">
+                      {client.first_name?.charAt(0)}
+                      {client.last_name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">
+                      {client.first_name} {client.last_name}
+                    </p>
+                    <Badge
+                      className={`mt-0.5 rounded-full px-2 py-0 text-[10px] font-bold border-none uppercase tracking-wide ${
+                        ROLE_PILL[client.role]
+                      }`}
+                    >
+                      {client.role}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex items-center min-w-0">
+                  <span className="text-sm text-slate-600 truncate">{client.email ?? "—"}</span>
+                </div>
+
+                {/* Phone */}
+                <div className="flex items-center">
+                  <span className="text-sm text-slate-600">{client.phone ?? "—"}</span>
+                </div>
+
+                {/* Joined */}
+                <div className="flex items-center">
+                  <span className="text-sm text-slate-500">
+                    {format(new Date(client.created_at), "MMM d, yyyy")}
+                  </span>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center justify-center">
+                  <IconChevronRight
+                    size={16}
+                    className="text-slate-300 group-hover:text-primary transition-colors"
+                  />
+                </div>
+              </button>
+            ))}
         </div>
       </div>
 
-      {/* View Modal */}
-      <Dialog open={!!selectedClient} onOpenChange={(open) => !open && setSelectedClient(null)}>
-        <DialogContent className="sm:max-w-[600px] rounded-[32px] overflow-hidden p-0 border-none shadow-2xl">
-          {selectedClient && (
-            <div className="flex flex-col">
-              {/* Cover/Header area */}
-              <div className="h-32 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent relative">
-                <div className="absolute -bottom-10 left-8">
-                   <Avatar className="h-24 w-24 border-4 border-white shadow-xl ring-1 ring-slate-100">
-                    <AvatarImage src={selectedClient.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedClient.email}`} />
-                    <AvatarFallback className="text-2xl font-bold">{selectedClient.first_name?.charAt(0)}</AvatarFallback>
+      {/* ── Detail panel ──────────────────────────────────────────────── */}
+      <Sheet open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg p-0 flex flex-col gap-0 border-l border-slate-200"
+        >
+          {selected && (
+            <>
+              {/* Header */}
+              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-b border-slate-100 px-6 pt-12 pb-6">
+                <div className="flex items-start gap-4">
+                  <Avatar className="h-16 w-16 border-2 border-white shadow-lg ring-1 ring-slate-100 shrink-0">
+                    <AvatarImage src={selected.avatar_url ?? undefined} />
+                    <AvatarFallback className="text-xl font-black bg-white text-slate-400">
+                      {selected.first_name?.charAt(0)}
+                      {selected.last_name?.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
-                </div>
-              </div>
-
-              <div className="pt-14 pb-8 px-8 flex flex-col gap-8">
-                <div className="flex justify-between items-start">
-                  <div>
-                    {isEditing ? (
-                      <div className="flex gap-2 mb-2">
-                        <Input 
-                          value={editForm.first_name || ""} 
-                          onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                          className="h-10 rounded-xl border-slate-200 font-bold"
-                          placeholder="First Name"
-                        />
-                        <Input 
-                          value={editForm.last_name || ""} 
-                          onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                          className="h-10 rounded-xl border-slate-200 font-bold"
-                          placeholder="Last Name"
-                        />
-                      </div>
-                    ) : (
-                      <h2 className="text-2xl font-bold text-slate-900">
-                        {selectedClient.first_name} {selectedClient.last_name}
-                      </h2>
-                    )}
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="rounded-full bg-slate-50 text-slate-600 border-slate-200 font-bold uppercase text-[10px] tracking-widest px-3">
-                        {selectedClient.role}
+                  <div className="min-w-0 pt-1">
+                    <h2 className="text-xl font-black text-slate-900 truncate">
+                      {selected.first_name} {selected.last_name}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <Badge
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border-none uppercase tracking-wide ${
+                          ROLE_PILL[selected.role]
+                        }`}
+                      >
+                        {selected.role}
                       </Badge>
-                      <span className="text-xs text-slate-400 font-medium tracking-tight">ID: {selectedClient.id}</span>
+                      <span className="text-xs text-slate-400 font-medium">
+                        Member since {format(new Date(selected.created_at), "MMMM yyyy")}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {!isEditing ? (
-                      <>
-                        <Button 
-                          onClick={() => setIsEditing(true)}
-                          variant="outline" 
-                          className="rounded-xl h-10 border-slate-200 hover:bg-primary/5 hover:text-primary transition-all font-bold"
-                        >
-                          <Pencil className="h-4 w-4 mr-2" />
-                          Edit Profile
-                        </Button>
-                        <Button 
-                          onClick={handleDeleteClient}
-                          variant="outline" 
-                          className="rounded-xl h-10 border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-100 transition-all font-bold"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Archive
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button 
-                          onClick={handleSaveProfile}
-                          disabled={updateProfileMutation.isPending}
-                          className="rounded-xl h-10 font-bold shadow-lg shadow-primary/10"
-                        >
-                          {updateProfileMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
-                          Save Changes
-                        </Button>
-                        <Button 
-                          onClick={() => setIsEditing(false)}
-                          variant="outline" 
-                          className="rounded-xl h-10 border-slate-200 font-bold"
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Contact Information</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
-                        <Mail className="h-4 w-4 text-slate-300" />
-                        {isEditing ? (
-                          <Input 
-                            value={editForm.email || ""} 
-                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                            className="h-8 border-none bg-transparent p-0 focus-visible:ring-0 font-medium"
-                            placeholder="Email Address"
-                          />
-                        ) : (
-                          <span className="font-medium">{selectedClient.email}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
-                        <Phone className="h-4 w-4 text-slate-300" />
-                        {isEditing ? (
-                          <Input 
-                            value={editForm.phone || ""} 
-                            onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                            className="h-8 border-none bg-transparent p-0 focus-visible:ring-0 font-medium"
-                            placeholder="Phone Number"
-                          />
-                        ) : (
-                          <span className="font-medium">{selectedClient.phone || 'No phone provided'}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Account Status</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
-                        <Calendar className="h-4 w-4 text-slate-300" />
-                        <span className="font-medium">Joined {format(new Date(selectedClient.created_at), "MMMM yyyy")}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
-                        <Clock className="h-4 w-4 text-slate-300" />
-                        <span className="font-medium">Active Member</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex bg-slate-50 p-4 rounded-3xl border border-slate-100 items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
-                        <MapPin className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="text-sm">
-                        <p className="font-bold text-slate-700">Medical Records</p>
-                        <p className="text-slate-500">Last updated: {format(new Date(), "PP")}</p>
-                      </div>
-                   </div>
-                   <Button variant="ghost" size="sm" className="text-primary font-bold hover:bg-white rounded-lg">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View Files
-                   </Button>
                 </div>
               </div>
 
-              <DialogFooter className="px-8 py-4 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-3 sm:justify-end">
-                <Button onClick={() => setSelectedClient(null)} variant="ghost" className="rounded-xl font-bold">
-                  Close
+              {/* Scrollable body */}
+              <ScrollArea className="flex-1 overflow-y-auto">
+                <div className="px-6 py-6 space-y-7">
+
+                  {/* Contact */}
+                  <section>
+                    <SectionHead icon={<IconUser size={14} />} title="Contact" />
+                    <div className="bg-slate-50/70 rounded-2xl px-4 border border-slate-100">
+                      <InfoRow icon={<IconMail size={15} />} label="Email" value={selected.email} />
+                      <InfoRow icon={<IconPhone size={15} />} label="Phone" value={selected.phone} />
+                      <InfoRow
+                        icon={<IconCalendar size={15} />}
+                        label="Date of Birth"
+                        value={
+                          selected.date_of_birth
+                            ? format(new Date(selected.date_of_birth + "T00:00:00"), "MMMM d, yyyy")
+                            : null
+                        }
+                      />
+                    </div>
+                  </section>
+
+                  {/* Insurance */}
+                  <section>
+                    <SectionHead icon={<IconShieldCheck size={14} />} title="Insurance" />
+                    <div className="bg-slate-50/70 rounded-2xl px-4 border border-slate-100">
+                      <InfoRow
+                        icon={<IconShieldCheck size={15} />}
+                        label="Provider"
+                        value={selected.insurance_provider}
+                      />
+                      <InfoRow
+                        icon={<IconId size={15} />}
+                        label="Member ID"
+                        value={selected.insurance_member_id}
+                      />
+                      <InfoRow
+                        icon={<IconHash size={15} />}
+                        label="Group Number"
+                        value={selected.insurance_group_number}
+                      />
+                    </div>
+                  </section>
+
+                  {/* Emergency contact */}
+                  <section>
+                    <SectionHead icon={<IconHeartHandshake size={14} />} title="Emergency Contact" />
+                    <div className="bg-slate-50/70 rounded-2xl px-4 border border-slate-100">
+                      <InfoRow
+                        icon={<IconUser size={15} />}
+                        label="Name"
+                        value={selected.emergency_contact_name}
+                      />
+                      <InfoRow
+                        icon={<IconHeartHandshake size={15} />}
+                        label="Relationship"
+                        value={selected.emergency_contact_relationship}
+                      />
+                      <InfoRow
+                        icon={<IconPhone size={15} />}
+                        label="Phone"
+                        value={selected.emergency_contact_phone}
+                      />
+                    </div>
+                  </section>
+
+                </div>
+              </ScrollArea>
+
+              {/* Footer */}
+              <div className="border-t border-slate-100 p-5 shrink-0">
+                <Button
+                  className="w-full h-12 rounded-2xl font-bold shadow-lg shadow-primary/15"
+                  onClick={() => {
+                    setSelected(null);
+                    navigate("/admin/messages");
+                  }}
+                >
+                  <IconMessages size={16} className="mr-2" />
+                  Open Message Thread
                 </Button>
-                <Button className="rounded-xl font-bold shadow-lg shadow-primary/10">
-                  Open Direct Message
-                </Button>
-              </DialogFooter>
-            </div>
+              </div>
+            </>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </DashboardLayout>
   );
 };

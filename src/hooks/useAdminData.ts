@@ -20,8 +20,15 @@ export interface Profile {
   first_name: string | null;
   last_name: string | null;
   phone: string | null;
-  role: 'user' | 'client' | 'admin' | 'banned';
+  role: "user" | "client" | "admin" | "banned";
   avatar_url: string | null;
+  date_of_birth: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_relationship: string | null;
+  emergency_contact_phone: string | null;
+  insurance_provider: string | null;
+  insurance_member_id: string | null;
+  insurance_group_number: string | null;
   created_at: string;
 }
 
