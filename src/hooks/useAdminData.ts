@@ -306,6 +306,20 @@ export const useAdminMetrics = () => {
   });
 };
 
+export const useAllAdminAppointments = () => {
+  return useQuery({
+    queryKey: ["admin-all-appointments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("*")
+        .order("start_time", { ascending: false });
+      if (error) throw error;
+      return data as AdminAppointment[];
+    },
+  });
+};
+
 export const useTodayAppointments = () => {
   return useQuery({
     queryKey: ["admin-today-appointments"],
