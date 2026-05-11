@@ -38,7 +38,6 @@ export const DashboardLayout = ({ children, isAdmin = false }: { children: React
 
   const adminLinks = [
     { label: "Overview", href: "/admin", icon: LayoutDashboard, badge: 0 },
-    { label: "Sessions", href: "/admin/sessions", icon: Calendar, badge: 0 },
     { label: "Clients", href: "/admin/clients", icon: Users, badge: 0 },
     { label: "Bookings", href: "/admin/bookings", icon: Calendar, badge: 0 },
     { label: "Messages", href: "/admin/messages", icon: MessageSquare, badge: 0 },
