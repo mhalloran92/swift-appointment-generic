@@ -11,6 +11,7 @@ import BookingSuccess from "./pages/BookingSuccess";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 import Dashboard from "./pages/client/ClientDashboard";
 import Notifications from "./pages/client/Notifications";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/booking-success" element={<BookingSuccess />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Protected Client/User Routes */}
             <Route element={<ProtectedRoute allowedRoles={["user", "client", "admin"]} />}>
