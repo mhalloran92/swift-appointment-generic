@@ -84,6 +84,27 @@ CREATE TABLE IF NOT EXISTS public.appointments (
   created_at           TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Patient Intake Forms (submitted via /intake)
+CREATE TABLE IF NOT EXISTS public.patient_intake (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  date_of_birth DATE NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT NOT NULL,
+  address TEXT NOT NULL,
+  insurance_provider TEXT,
+  insurance_member_id TEXT,
+  insurance_group_number TEXT,
+  reason_for_visit TEXT NOT NULL,
+  current_medications TEXT,
+  previous_injuries TEXT,
+  emergency_contact_name TEXT NOT NULL,
+  emergency_contact_phone TEXT NOT NULL,
+  consent BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Availability Rules (For recurring schedules)
 CREATE TABLE IF NOT EXISTS public.availability_rules (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -231,6 +252,15 @@ ON public.bookings FOR ALL USING (public.is_admin());
 -- Availability Rules Policies
 CREATE POLICY "Admins can manage availability rules" 
 ON public.availability_rules FOR ALL USING (public.is_admin());
+
+-- Patient Intake Policies
+ALTER TABLE public.patient_intake ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can submit intake forms"
+ON public.patient_intake FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Admins can view all intake forms"
+ON public.patient_intake FOR SELECT USING (public.is_admin());
 
 -- History Tables Policies
 CREATE POLICY "Admins can view history" 

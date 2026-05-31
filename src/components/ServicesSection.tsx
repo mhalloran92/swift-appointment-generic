@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import { useClientProfile } from "@/hooks/useClientData";
 import CalendlyInline from "./calendly/CalendlyInline";
 
 type Service = typeof siteConfig.services[0];
-type DialogState = "auth" | "first-visit" | "calendly" | null;
+type DialogState = "auth" | "first-visit" | "calendly" | "intake-prompt" | null;
 
 export default function ServicesSection() {
   const { ref, isVisible } = useScrollFadeIn();
@@ -43,6 +43,20 @@ export default function ServicesSection() {
   const [isChecking, setIsChecking] = useState(false);
 
   const initialService = siteConfig.services.find(s => s.id === "initial") ?? siteConfig.services[0];
+
+  // Listen for Calendly's booking-complete event; prompt intake form for new patients
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (
+        e.data?.event === "calendly.event_scheduled" &&
+        selectedService?.id === "initial"
+      ) {
+        setDialogState("intake-prompt");
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [selectedService]);
 
   const closeDialog = () => {
     setDialogState(null);
@@ -198,6 +212,36 @@ export default function ServicesSection() {
             </Button>
             <Button onClick={handleFirstVisitNo} variant="outline" className="w-full h-11 font-bold rounded-xl">
               No, I've been here before
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Intake form prompt — shown after new patient books Initial Consultation */}
+      <Dialog open={dialogState === "intake-prompt"} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="sm:max-w-[400px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black">
+              Save time at your visit
+            </DialogTitle>
+            <DialogDescription className="text-sm">
+              Complete your intake form now — it takes about 3 minutes and means
+              less paperwork on the day of your appointment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-2">
+            <Button
+              onClick={() => { closeDialog(); navigate("/intake"); }}
+              className="w-full h-11 font-bold rounded-xl"
+            >
+              Complete My Intake Form
+            </Button>
+            <Button
+              onClick={closeDialog}
+              variant="ghost"
+              className="w-full h-11 font-bold rounded-xl text-slate-500"
+            >
+              I'll do it later
             </Button>
           </div>
         </DialogContent>

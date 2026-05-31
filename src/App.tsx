@@ -26,6 +26,8 @@ import Bookings from "./pages/admin/Bookings";
 import Availability from "./pages/admin/Availability";
 import AdminMessages from "./pages/admin/Messages";
 import AdminSettings from "./pages/admin/Settings";
+import IntakeForms from "./pages/admin/IntakeForms";
+import IntakeForm from "./pages/IntakeForm";
 import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,7 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
+            <Route path="/intake" element={<IntakeForm />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
@@ -65,6 +68,7 @@ const App = () => (
               <Route path="/admin/availability" element={<Availability />} />
               <Route path="/admin/messages" element={<AdminMessages />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/intake-forms" element={<IntakeForms />} />
             </Route>
 
             {/* Catch-all */}
